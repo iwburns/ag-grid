@@ -119,10 +119,11 @@ export class DetailCellRendererCtrl extends BeanStub implements IDetailCellRende
 
         const gridInfo: DetailGridInfo = {
             id: rowId,
-            api: api,
+            api,
         };
 
         const rowNode = params.node as RowNode;
+        console.log('register');
 
         // register with api if the master api is still alive
         if (masterGridApi.isDestroyed()) {

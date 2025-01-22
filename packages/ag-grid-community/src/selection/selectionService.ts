@@ -18,6 +18,54 @@ import { ChangedPath } from '../utils/changedPath';
 import { _error, _warn } from '../validation/logging';
 import { BaseSelectionService } from './baseSelectionService';
 
+interface SelectionState {
+    root: boolean;
+    toggled: Map<string, SelectionState>;
+}
+
+function _selectAllNodes(state: SelectionState): void {
+    state.root = true;
+    state.toggled.clear();
+}
+
+function _deselectAllNodes(state: SelectionState): void {
+    state.root = false;
+    state.toggled.clear();
+}
+
+function _selectNode(state: SelectionState, node: RowNode): void {
+    if (state.root) {
+        state.toggled.delete(node.id!);
+    } else {
+        const child = state.toggled.get(node.id!);
+
+        if (child) {
+            _selectAllNodes(child);
+        } else {
+            state.toggled.set(node.id!, { root: true, toggled: new Map() });
+        }
+    }
+}
+
+function _deselectNode(state: SelectionState, node: RowNode): void {
+    if (state.root) {
+        const child = state.toggled.get(node.id!);
+
+        if (child) {
+            _deselectAllNodes(child);
+        } else {
+            state.toggled.set(node.id!, { root: false, toggled: new Map() });
+        }
+    } else {
+        state.toggled.delete(node.id!);
+    }
+}
+
+function _getDetailSelectionState(state: SelectionState, node: RowNode): SelectionState {
+    const child = state.toggled.get(node.id!);
+    return child ?? { root: state.root, toggled: new Map() };
+}
+
 export class SelectionService extends BaseSelectionService implements NamedBean, ISelectionService {
     beanName = 'selectionSvc' as const;
 

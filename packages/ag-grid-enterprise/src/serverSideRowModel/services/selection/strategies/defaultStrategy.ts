@@ -16,6 +16,11 @@ interface SelectedState {
     toggledNodes: Set<string>;
 }
 
+interface MasterDetailSelectedState {
+    root: SelectedState;
+    details: Map<string, MasterDetailSelectedState>;
+}
+
 export class DefaultStrategy extends BeanStub implements ISelectionStrategy {
     private rowModel: IRowModel;
     private selectionSvc?: ISelectionService;
