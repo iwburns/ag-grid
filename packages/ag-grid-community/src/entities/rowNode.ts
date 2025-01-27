@@ -361,18 +361,15 @@ export class RowNode<TData = any>
 
     public setDataAndId(data: TData, id: string | undefined): void {
         const { selectionSvc } = this.beans;
-        const oldNode = selectionSvc?.createDaemonNode?.(this);
         const oldData = this.data;
 
         this.data = data;
         this.updateDataOnDetailNode();
         this.setId(id);
-        if (selectionSvc) {
-            selectionSvc.updateRowSelectable(this);
-            selectionSvc.syncInRowNode(this, oldNode);
-        }
+        selectionSvc?.updateRowSelectable(this);
+        selectionSvc?.syncInRowNode(this);
 
-        const event: DataChangedEvent<TData> = this.createDataChangedEvent(data, oldData, false);
+        const event = this.createDataChangedEvent(data, oldData, false);
 
         this.__localEventService?.dispatchEvent(event);
     }

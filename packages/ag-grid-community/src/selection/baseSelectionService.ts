@@ -1,5 +1,6 @@
 import { isColumnSelectionCol } from '../columns/columnUtils';
 import { BeanStub } from '../context/beanStub';
+import type { BeanCollection } from '../context/context';
 import type { AgColumn } from '../entities/agColumn';
 import type { IsRowSelectable } from '../entities/gridOptions';
 import type { RowNode } from '../entities/rowNode';
@@ -22,7 +23,7 @@ import type { IRowNode } from '../interfaces/iRowNode';
 import type { ISetNodesSelectedParams } from '../interfaces/iSelectionService';
 import type { RowCtrl, RowGui } from '../rendering/row/rowCtrl';
 import { _setAriaSelected } from '../utils/aria';
-import type { ChangedPath } from '../utils/changedPath';
+import { ChangedPath } from '../utils/changedPath';
 import { CheckboxSelectionComponent } from './checkboxSelectionComponent';
 import { RowRangeSelectionContext } from './rowRangeSelectionContext';
 import { SelectAllFeature } from './selectAllFeature';
@@ -105,8 +106,6 @@ export abstract class BaseSelectionService extends BeanStub {
         });
     }
 
-    public updateGroupsFromChildrenSelections?(source: SelectionEventSourceType, changedPath?: ChangedPath): boolean;
-
     public abstract setNodesSelected(params: ISetNodesSelectedParams): number;
 
     protected abstract updateSelectable(changedPath?: ChangedPath): void;
@@ -132,7 +131,7 @@ export abstract class BaseSelectionService extends BeanStub {
 
             const isGroupSelectsChildren = _getGroupSelectsDescendants(this.gos);
             if (isGroupSelectsChildren) {
-                const selected = this.calculateSelectedFromChildren(rowNode);
+                const selected = _calculateSelectedFromChildren(rowNode);
                 this.setNodesSelected({ nodes: [rowNode], newValue: selected ?? false, source: 'selectableChanged' });
                 return;
             }
@@ -144,90 +143,13 @@ export abstract class BaseSelectionService extends BeanStub {
         }
     }
 
-    protected calculateSelectedFromChildren(rowNode: RowNode): boolean | undefined | null {
-        let atLeastOneSelected = false;
-        let atLeastOneDeSelected = false;
-
-        if (!rowNode.childrenAfterGroup?.length) {
-            return rowNode.selectable ? rowNode.__selected : null;
-        }
-
-        for (let i = 0; i < rowNode.childrenAfterGroup.length; i++) {
-            const child = rowNode.childrenAfterGroup[i];
-
-            let childState = child.isSelected();
-            // non-selectable nodes must be calculated from their children, or ignored if no value results.
-            if (!child.selectable) {
-                const selectable = this.calculateSelectedFromChildren(child);
-                if (selectable === null) {
-                    continue;
-                }
-                childState = selectable;
-            }
-
-            switch (childState) {
-                case true:
-                    atLeastOneSelected = true;
-                    break;
-                case false:
-                    atLeastOneDeSelected = true;
-                    break;
-                default:
-                    return undefined;
-            }
-        }
-
-        if (atLeastOneSelected && atLeastOneDeSelected) {
-            return undefined;
-        }
-
-        if (atLeastOneSelected) {
-            return true;
-        }
-
-        if (atLeastOneDeSelected) {
-            return false;
-        }
-
-        if (!rowNode.selectable) {
-            return null;
-        }
-
-        return rowNode.__selected;
-    }
-
     public selectRowNode(
         rowNode: RowNode,
         newValue?: boolean,
         e?: Event,
         source: SelectionEventSourceType = 'api'
     ): boolean {
-        // we only check selectable when newValue=true (ie selecting) to allow unselecting values,
-        // as selectable is dynamic, need a way to unselect rows when selectable becomes false.
-        const selectionNotAllowed = !rowNode.selectable && newValue;
-        const selectionNotChanged = rowNode.__selected === newValue;
-
-        if (selectionNotAllowed || selectionNotChanged) {
-            return false;
-        }
-
-        rowNode.__selected = newValue;
-
-        rowNode.dispatchRowEvent('rowSelected');
-
-        // in case of root node, sibling may have service while this row may not
-        const sibling = rowNode.sibling;
-        if (sibling && sibling.footer && sibling.__localEventService) {
-            sibling.dispatchRowEvent('rowSelected');
-        }
-
-        this.eventSvc.dispatchEvent({
-            ..._createGlobalRowEvent(rowNode, this.gos, 'rowSelected'),
-            event: e || null,
-            source,
-        });
-
-        return true;
+        return _selectRowNode(this.beans, rowNode, newValue, e, source);
     }
 
     public isCellCheckboxSelection(column: AgColumn, rowNode: IRowNode): boolean {
@@ -377,3 +299,130 @@ interface MultiNodeSelection {
     reset: boolean;
 }
 type NodeSelection = SingleNodeSelection | MultiNodeSelection;
+
+export function _selectRowNode(
+    beans: BeanCollection,
+    rowNode: RowNode,
+    newValue?: boolean,
+    e?: Event,
+    source: SelectionEventSourceType = 'api'
+): boolean {
+    // we only check selectable when newValue=true (ie selecting) to allow unselecting values,
+    // as selectable is dynamic, need a way to unselect rows when selectable becomes false.
+    const selectionNotAllowed = !rowNode.selectable && newValue;
+    const selectionNotChanged = rowNode.__selected === newValue;
+
+    if (selectionNotAllowed || selectionNotChanged) {
+        return false;
+    }
+
+    rowNode.__selected = newValue;
+
+    rowNode.dispatchRowEvent('rowSelected');
+
+    // in case of root node, sibling may have service while this row may not
+    const sibling = rowNode.sibling;
+    if (sibling && sibling.footer && sibling.__localEventService) {
+        sibling.dispatchRowEvent('rowSelected');
+    }
+
+    beans.eventSvc.dispatchEvent({
+        ..._createGlobalRowEvent(rowNode, beans.gos, 'rowSelected'),
+        event: e || null,
+        source,
+    });
+
+    return true;
+}
+
+export function _calculateSelectedFromChildren(rowNode: RowNode): boolean | undefined | null {
+    let atLeastOneSelected = false;
+    let atLeastOneDeSelected = false;
+
+    if (!rowNode.childrenAfterGroup?.length) {
+        return rowNode.selectable ? rowNode.__selected : null;
+    }
+
+    for (let i = 0; i < rowNode.childrenAfterGroup.length; i++) {
+        const child = rowNode.childrenAfterGroup[i];
+
+        let childState = child.isSelected();
+        // non-selectable nodes must be calculated from their children, or ignored if no value results.
+        if (!child.selectable) {
+            const selectable = _calculateSelectedFromChildren(child);
+            if (selectable === null) {
+                continue;
+            }
+            childState = selectable;
+        }
+
+        switch (childState) {
+            case true:
+                atLeastOneSelected = true;
+                break;
+            case false:
+                atLeastOneDeSelected = true;
+                break;
+            default:
+                return undefined;
+        }
+    }
+
+    if (atLeastOneSelected && atLeastOneDeSelected) {
+        return undefined;
+    }
+
+    if (atLeastOneSelected) {
+        return true;
+    }
+
+    if (atLeastOneDeSelected) {
+        return false;
+    }
+
+    if (!rowNode.selectable) {
+        return null;
+    }
+
+    return rowNode.__selected;
+}
+
+export function _updateGroupsFromChildrenSelections(
+    beans: BeanCollection,
+    groupSelectsDescendants: boolean,
+    source: SelectionEventSourceType,
+    changedPath?: ChangedPath
+): boolean {
+    // we only do this when group selection state depends on selected children
+    if (!groupSelectsDescendants) {
+        return false;
+    }
+    const { gos, rowModel } = beans;
+    // also only do it if CSRM (code should never allow this anyway)
+    if (!_isClientSideRowModel(gos, rowModel)) {
+        return false;
+    }
+
+    const rootNode = rowModel.rootNode;
+    if (!rootNode) {
+        return false;
+    }
+
+    if (!changedPath) {
+        changedPath = new ChangedPath(true, rootNode);
+        changedPath.active = false;
+    }
+
+    let selectionChanged = false;
+
+    changedPath.forEachChangedNodeDepthFirst((rowNode) => {
+        if (rowNode !== rootNode) {
+            const selected = _calculateSelectedFromChildren(rowNode);
+            selectionChanged =
+                _selectRowNode(beans, rowNode, selected === null ? false : selected, undefined, source) ||
+                selectionChanged;
+        }
+    });
+
+    return selectionChanged;
+}
