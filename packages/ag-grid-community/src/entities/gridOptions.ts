@@ -2592,6 +2592,16 @@ interface CommonRowSelectionOptions<TData = any, TValue = any> {
      * @default false
      */
     enableSelectionWithoutKeys?: boolean;
+    /**
+     * Determines whether selection state is synchronised between master row and detail grid.
+     *
+     * When `'self'`, selecting the master row has no effect on the detail grid, and vice versa.
+     * When `'detail'`, selection and deselection of the master row behaves the same as the header checkbox of the detail grid.
+     * Selection and deselection of detail rows behaves the same as selection state of descendant group rows when `groupSelects != 'self'`.
+     *
+     * @default 'self'
+     */
+    masterSelects?: 'self' | 'detail';
 }
 
 /**
