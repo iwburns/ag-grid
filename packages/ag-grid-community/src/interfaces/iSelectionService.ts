@@ -42,6 +42,7 @@ export interface ISelectionService {
     updateSelectableAfterGrouping(changedPath: ChangedPath | undefined): void;
     updateRowSelectable(rowNode: RowNode, suppressSelectionUpdate?: boolean): boolean;
     selectRowNode(rowNode: RowNode, newValue?: boolean, e?: Event, source?: SelectionEventSourceType): boolean;
+    createDaemonNode?(rowNode: RowNode): RowNode | undefined;
     handleSelectionEvent(event: MouseEvent | KeyboardEvent, rowNode: RowNode, source: SelectionEventSourceType): number;
     isCellCheckboxSelection(column: AgColumn, rowNode: IRowNode): boolean;
 }
