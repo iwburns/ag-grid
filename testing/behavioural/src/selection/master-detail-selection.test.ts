@@ -13,57 +13,57 @@ describe('Row Selection Grid Options', () => {
         {
             sport: 'football',
             detail: [
-                { games: 20, detail: [{ won: 12 }] },
-                { games: 122, detail: [{ won: 3 }] },
+                { games: 1, detail: [{ won: 1 }] },
+                { games: 2, detail: [{ won: 2 }] },
                 { games: 3, detail: [{ won: 3 }] },
             ],
         },
         {
             sport: 'rugby',
             detail: [
-                { games: 20, detail: [{ won: 22 }] },
-                { games: 122, detail: [{ won: 22 }] },
-                { games: 3, detail: [{ won: 22 }] },
+                { games: 4, detail: [{ won: 4 }] },
+                { games: 5, detail: [{ won: 5 }] },
+                { games: 6, detail: [{ won: 6 }] },
             ],
         },
         {
             sport: 'tennis',
             detail: [
-                { games: 20, detail: [{ won: 22 }] },
-                { games: 122, detail: [{ won: 22 }] },
-                { games: 3, detail: [{ won: 22 }] },
+                { games: 7, detail: [{ won: 7 }] },
+                { games: 8, detail: [{ won: 8 }] },
+                { games: 9, detail: [{ won: 9 }] },
             ],
         },
         {
             sport: 'cricket',
             detail: [
-                { games: 20, detail: [{ won: 22 }] },
-                { games: 122, detail: [{ won: 22 }] },
-                { games: 3, detail: [{ won: 22 }] },
+                { games: 10, detail: [{ won: 10 }] },
+                { games: 11, detail: [{ won: 11 }] },
+                { games: 12, detail: [{ won: 12 }] },
             ],
         },
         {
             sport: 'golf',
             detail: [
-                { games: 20, detail: [{ won: 22 }] },
-                { games: 122, detail: [{ won: 22 }] },
-                { games: 3, detail: [{ won: 22 }] },
+                { games: 13, detail: [{ won: 13 }] },
+                { games: 14, detail: [{ won: 14 }] },
+                { games: 15, detail: [{ won: 15 }] },
             ],
         },
         {
             sport: 'swimming',
             detail: [
-                { games: 20, detail: [{ won: 22 }] },
-                { games: 122, detail: [{ won: 22 }] },
-                { games: 3, detail: [{ won: 22 }] },
+                { games: 16, detail: [{ won: 16 }] },
+                { games: 17, detail: [{ won: 17 }] },
+                { games: 18, detail: [{ won: 18 }] },
             ],
         },
         {
             sport: 'rowing',
             detail: [
-                { games: 20, detail: [{ won: 22 }] },
-                { games: 122, detail: [{ won: 22 }] },
-                { games: 3, detail: [{ won: 22 }] },
+                { games: 19, detail: [{ won: 19 }] },
+                { games: 20, detail: [{ won: 20 }] },
+                { games: 21, detail: [{ won: 21 }] },
             ],
         },
     ];
@@ -256,12 +256,17 @@ describe('Row Selection Grid Options', () => {
                         detailGridOptions: {
                             columnDefs: [{ field: 'won' }],
                             rowSelection: { mode: 'multiRow' },
+                            getRowId(params: GetRowIdParams) {
+                                return `detail-level-2-${JSON.stringify(params.data)}`;
+                            },
                         },
                         getDetailRowData(params: GetDetailRowDataParams) {
                             params.successCallback(params.data.detail);
                         },
                     },
-                    getRowId(params: GetRowIdParams) {},
+                    getRowId(params: GetRowIdParams) {
+                        return `detail-level-1-${JSON.stringify(params.data)}`;
+                    },
                 },
                 getDetailRowData(params: GetDetailRowDataParams) {
                     params.successCallback(params.data.detail);
@@ -273,11 +278,16 @@ describe('Row Selection Grid Options', () => {
 
         await actions.expandGroupRowByIndex(1);
 
-        const info = api.getDetailGridInfo('detail_1')!;
-        expect(info).not.toBeUndefined();
-        const detailActions = new GridActions(info.api!, '[row-id="detail_1"]');
+        const detailOneInfo = api.getDetailGridInfo('detail_1')!;
+        expect(detailOneInfo).not.toBeUndefined();
 
-        await detailActions.expandGroupRowByIndex(1);
+        const detailActions = new GridActions(detailOneInfo.api!, '[row-id="detail_1"]');
+        await detailActions.expandGroupRowById('detail-level-1-{"games":2}');
+
+        const leafGridInfo = detailOneInfo.api?.getDetailGridInfo('detail_detail-level-1-{"games":2}');
+        expect(leafGridInfo).not.toBeUndefined();
+
+        const leafGridActions = new GridActions(leafGridInfo.api!, '');
     });
 
     test.skip('de-selecting leaf-level detail row propagates indeterminate state to all parents', async () => {});

@@ -75,9 +75,21 @@ export class GridActions {
             ?.dispatchEvent(new MouseEvent('click', { ...opts, bubbles: true }));
     }
 
+    clickExpandGroupRowById(id: string, opts?: MouseEventInit): void {
+        this.getRowById(id)
+            ?.querySelector<HTMLElement>('.ag-group-contracted')
+            ?.dispatchEvent(new MouseEvent('click', { ...opts, bubbles: true }));
+    }
+
     async expandGroupRowByIndex(index: number, opts?: MouseEventInit): Promise<void> {
         const updated = waitForEvent('modelUpdated', this.api, 2); // attach listener first
         this.clickExpandGroupRowByIndex(index, opts);
+        await updated;
+    }
+
+    async expandGroupRowById(id: string, opts?: MouseEventInit): Promise<void> {
+        const updated = waitForEvent('modelUpdated', this.api, 2);
+        this.clickExpandGroupRowById(id, opts);
         await updated;
     }
 }

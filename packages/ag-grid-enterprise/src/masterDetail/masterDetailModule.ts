@@ -11,6 +11,7 @@ import { DetailCellRenderer } from './detailCellRenderer';
 import { DetailCellRendererCtrl } from './detailCellRendererCtrl';
 import { addDetailGridInfo, forEachDetailGridInfo, getDetailGridInfo, removeDetailGridInfo } from './masterDetailApi';
 import { masterDetailModuleCSS } from './masterDetailModule.css-GENERATED';
+import { MasterDetailSelectionService } from './masterDetailSelectionService';
 import { MasterDetailService } from './masterDetailService';
 
 /**
@@ -19,7 +20,7 @@ import { MasterDetailService } from './masterDetailService';
 export const SharedMasterDetailModule: _ModuleWithApi<_MasterDetailGridApi> = {
     moduleName: 'SharedMasterDetail',
     version: VERSION,
-    beans: [MasterDetailService],
+    beans: [MasterDetailService, MasterDetailSelectionService],
     userComponents: { agDetailCellRenderer: DetailCellRenderer },
     dynamicBeans: { detailCellRendererCtrl: DetailCellRendererCtrl },
     apiFunctions: {
