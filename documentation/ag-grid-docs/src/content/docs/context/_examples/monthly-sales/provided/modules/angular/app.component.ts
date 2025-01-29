@@ -1,8 +1,7 @@
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
 
 import { AgGridAngular } from 'ag-grid-angular';
-// NOTE: Angular CLI does not support component CSS imports: angular-cli/issues/23273
 import type {
     ColDef,
     ColGroupDef,
@@ -40,7 +39,7 @@ ModuleRegistry.registerModules([
 
 @Component({
     standalone: true,
-    imports: [AgGridAngular, HttpClientModule],
+    imports: [AgGridAngular],
     selector: 'my-app',
     template: `<div class="test-container">
         <div class="test-header">
