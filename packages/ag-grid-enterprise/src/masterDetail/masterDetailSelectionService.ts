@@ -27,24 +27,76 @@ export class MasterDetailSelectionService extends BaseSelectionService implement
 
     private selectionState: SelectionState = { master: false, detail: new Map() };
 
-    public override postConstruct(): void {
-        super.postConstruct();
-    }
-
     getSelectionState():
         | string[]
         | ServerSideRowSelectionState
         | ServerSideRowGroupSelectionState
         | IMasterDetailSelectionState
         | null {
-        throw new Error('unimplemented');
+        const recursivelySerializeState = (source: SelectionState) => {
+            const target: IMasterDetailSelectionState = {
+                master: source.master,
+                detail: {},
+            };
+
+            for (const [id, state] of source.detail) {
+                target.detail[id] = recursivelySerializeState(state);
+            }
+
+            return target;
+        };
+
+        return recursivelySerializeState(this.selectionState);
     }
 
     setSelectionState(
-        state: string[] | ServerSideRowSelectionState | ServerSideRowGroupSelectionState | IMasterDetailSelectionState,
-        source: SelectionEventSourceType
+        _state: string[] | ServerSideRowSelectionState | ServerSideRowGroupSelectionState | IMasterDetailSelectionState
     ): void {
-        throw new Error('unimplemented');
+        // Make no assumptions
+        const state = _state as unknown;
+
+        if (Array.isArray(state)) {
+            return _error(243);
+        }
+
+        const recursivelyDeserializeState = (source: unknown): SelectionState => {
+            if (!source || typeof source !== 'object') {
+                _error(243);
+                throw new Error();
+            }
+
+            if (!('master' in source && 'detail' in source)) {
+                _error(243);
+                throw new Error();
+            }
+
+            if (typeof source.master !== 'boolean') {
+                _error(243);
+                throw new Error();
+            }
+
+            const target: SelectionState = {
+                master: source.master,
+                detail: new Map(),
+            };
+
+            if (!source.detail || typeof source.detail != 'object') {
+                _error(243);
+                throw new Error();
+            }
+
+            for (const [key, value] of Object.entries(source.detail)) {
+                target.detail.set(key, recursivelyDeserializeState(value));
+            }
+
+            return target;
+        };
+
+        try {
+            this.selectionState = recursivelyDeserializeState(state);
+        } catch (error) {
+            // do nothing
+        }
     }
 
     getSelectAllState(selectAll?: SelectAllMode | undefined): boolean | null {}
@@ -77,6 +129,10 @@ export class MasterDetailSelectionService extends BaseSelectionService implement
                 return 0;
             }
             this.deselectAllRowNodes({ source });
+        }
+
+        for (const node of nodes) {
+            const rowNode = node.footer ? node.sibling : node;
         }
     }
 
