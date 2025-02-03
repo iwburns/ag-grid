@@ -96,7 +96,7 @@ export class DetailCellRenderer extends Component implements ICellRenderer {
         const api = createGrid(this.eDetailGrid, gridOptions, {
             frameworkOverrides,
             providedBeanInstances: {
-                frameworkCompWrapper: frameworkCompWrapper,
+                frameworkCompWrapper,
             },
             modules: _getGridRegisteredModules(this.params.api.getGridId(), gridOptions.rowModelType ?? 'clientSide'),
         } as GridParams);

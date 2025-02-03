@@ -466,6 +466,7 @@ export { IGetRowsParams, IDatasource } from './interfaces/iDatasource';
 
 // selection
 export { BaseSelectionService } from './selection/baseSelectionService';
+export { _normaliseFooterRef } from './selection/selectionUtils';
 
 // styling
 export type { CellStyleService } from './styling/cellStyleService';
@@ -698,8 +699,10 @@ export {
 
 // uncatalogued
 export { IRowModel, RowBounds, RowModelType } from './interfaces/iRowModel';
-export { ISelectionService, ISetNodesSelectedParams } from './interfaces/iSelectionService';
+export { ISelectionService, ISetNodesSelectedParams, SelectionState } from './interfaces/iSelectionService';
+export { ISelectionStrategy } from './interfaces/iSelectionStrategy';
 export { IExpansionService } from './interfaces/iExpansionService';
+export { IMasterDetailSelectionState } from './interfaces/iMasterDetailSelectionState';
 export { ServerSideRowSelectionState, ServerSideRowGroupSelectionState } from './interfaces/selectionState';
 export { IServerSideSelectionState, IServerSideGroupSelectionState } from './interfaces/iServerSideSelection';
 export { IAggFuncService } from './interfaces/iAggFuncService';

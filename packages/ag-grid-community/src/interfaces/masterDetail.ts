@@ -1,4 +1,4 @@
-import type { GridApi } from '../api/gridApi';
+import type { DetailGridInfo, GridApi } from '../api/gridApi';
 import type { Bean } from '../context/bean';
 import type { GridOptions } from '../entities/gridOptions';
 import type { RowNode } from '../entities/rowNode';
@@ -61,4 +61,7 @@ export interface IMasterDetailService {
 
     /** Used by flatten stage to get or create a detail node from a master node */
     getDetail(masterNode: RowNode): RowNode | null;
+
+    /** Used by MasterDetailSelectionService */
+    getDetailGridInfo(masterNode: RowNode): DetailGridInfo | undefined;
 }

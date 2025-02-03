@@ -123,7 +123,6 @@ export class DetailCellRendererCtrl extends BeanStub implements IDetailCellRende
         };
 
         const rowNode = params.node as RowNode;
-        console.log('register');
 
         // register with api if the master api is still alive
         if (masterGridApi.isDestroyed()) {
@@ -133,6 +132,19 @@ export class DetailCellRendererCtrl extends BeanStub implements IDetailCellRende
 
         // register with node
         rowNode.detailGridInfo = gridInfo;
+
+        api.addEventListener('rowSelected', (event) => {
+            masterGridApi.storeDetailSelectionState(api.getSelectionState(), event);
+        });
+
+        masterGridApi.addEventListener('rowSelected', (event) => {
+            api.syncDetailSelectionState(masterGridApi.getSelectionState(), event);
+        });
+
+        const noInitialState = false; // TODO
+        if (noInitialState) {
+            api.syncDetailSelectionState(masterGridApi.getSelectionState());
+        }
 
         this.addDestroyFunc(() => {
             // the gridInfo can be stale if a refresh happens and
@@ -166,19 +178,17 @@ export class DetailCellRendererCtrl extends BeanStub implements IDetailCellRende
             return;
         }
 
-        const successCallback = (rowData: any[]) => {
-            const mostRecentCall = this.loadRowDataVersion === versionThisCall;
-            if (mostRecentCall) {
-                this.comp.setRowData(rowData);
-            }
-        };
-
-        const funcParams: any = {
+        const funcParams = {
             node: params.node,
             // we take data from node, rather than params.data
             // as the data could have been updated with new instance
             data: params.node.data,
-            successCallback: successCallback,
+            successCallback: (rowData: any[]) => {
+                const mostRecentCall = this.loadRowDataVersion === versionThisCall;
+                if (mostRecentCall) {
+                    this.comp.setRowData(rowData);
+                }
+            },
             context: this.gos.getGridCommonParams().context,
         };
         userFunc(funcParams);

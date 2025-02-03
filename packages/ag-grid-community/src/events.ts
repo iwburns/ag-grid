@@ -296,16 +296,18 @@ export interface PinnedHeightChangedEvent<TData = any, TContext = any>
  * - `apiSelectAllFiltered` - from API methods `selectAllFiltered`/`deselectAllFiltered`
  * - `apiSelectAllCurrentPage` - from API methods `selectAllOnCurrentPage`/`deselectAllOnCurrentPage`
  * - `checkboxSelected` - row selection checkbox clicked
+ * - `detailGrid` -
+ * - `gridInitializing` - set as part of initial state while the grid is initializing
+ * - `keyboardSelectAll` - select all via keyboard shortcut (CTRL+A)
+ * - `masterGrid` -
  * - `rowClicked` - row clicked when row selection enabled
  * - `rowDataChanged` - row data updated which triggered selection updates
  * - `rowGroupChanged` - grouping changed which updated the selection
  * - `selectableChanged`- selectable status of row has changed when `rowSelection.groupSelects` is `'descendants'` or `'filteredDescendants'`
  * - `spaceKey` - space key pressed on row
- * - `keyboardSelectAll` - select all via keyboard shortcut (CTRL+A)
  * - `uiSelectAll` - select all in header clicked
  * - `uiSelectAllFiltered` - select all in header clicked when `rowSelection.selectAll = 'filtered'`
  * - `uiSelectAllCurrentPage` - select all in header clicked when `rowSelection.selectAll = 'currentPage'`
- * - 'gridInitializing' - set as part of initial state while the grid is initializing
  */
 export type SelectionEventSourceType =
     | 'api'
@@ -313,16 +315,18 @@ export type SelectionEventSourceType =
     | 'apiSelectAllFiltered'
     | 'apiSelectAllCurrentPage'
     | 'checkboxSelected'
+    | 'detailGrid'
+    | 'gridInitializing'
+    | 'keyboardSelectAll'
+    | 'masterGrid'
     | 'rowClicked'
     | 'rowDataChanged'
     | 'rowGroupChanged'
     | 'selectableChanged'
     | 'spaceKey'
-    | 'keyboardSelectAll'
     | 'uiSelectAll'
     | 'uiSelectAllFiltered'
-    | 'uiSelectAllCurrentPage'
-    | 'gridInitializing';
+    | 'uiSelectAllCurrentPage';
 
 export interface SelectionChangedEvent<TData = any, TContext = any>
     extends AgGlobalEvent<'selectionChanged', TData, TContext> {

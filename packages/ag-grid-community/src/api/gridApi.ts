@@ -9,6 +9,7 @@ import type {
     AgGlobalEventListener,
     ColumnEventType,
     FilterChangedEventSourceType,
+    RowSelectedEvent,
     SelectionEventSourceType,
 } from '../events';
 import type { ManagedGridOptionKey, ManagedGridOptions } from '../gridOptionsInitial';
@@ -43,6 +44,7 @@ import type { FilterModel, IFilter } from '../interfaces/iFilter';
 import type { IFiltersToolPanel } from '../interfaces/iFiltersToolPanel';
 import type { RedrawRowsParams } from '../interfaces/iRedrawRowsParams';
 import type { IRowNode, RowPinnedType } from '../interfaces/iRowNode';
+import type { SelectionState } from '../interfaces/iSelectionService';
 import type { LoadSuccessParams, RefreshServerSideParams } from '../interfaces/iServerSideRowModel';
 import type { IServerSideGroupSelectionState, IServerSideSelectionState } from '../interfaces/iServerSideSelection';
 import type { SideBarDef } from '../interfaces/iSideBar';
@@ -175,6 +177,20 @@ export interface _RowSelectionGridApi<TData = any> {
 
     /** Returns an unsorted list of selected rows (i.e. row data that you provided). */
     getSelectedRows(): TData[];
+
+    /**
+     * Returns internal representation of selection state
+     *
+     * @internal This is not a public method. There are no stability guarantees. Do not use.
+     */
+    getSelectionState(): SelectionState;
+
+    /**
+     * Set internal representation of selection state
+     *
+     * @internal This is not a public method. There are no stability guarantees. Do not use.
+     */
+    setSelectionState(state: SelectionState): void;
 }
 
 export interface _OverlayGridApi {
@@ -1079,6 +1095,20 @@ export interface _MasterDetailGridApi {
 
     /** Iterates through each `DetailGridInfo` in the grid and calls the supplied callback on each. */
     forEachDetailGridInfo(callback: (gridInfo: DetailGridInfo, index: number) => void): void;
+
+    /**
+     * Sync selection state into Master grid from Detail grid
+     *
+     * @internal This is not a public method. There are no stability guarantees. Do not use.
+     */
+    storeDetailSelectionState(state: SelectionState, event: RowSelectedEvent): void;
+
+    /**
+     * Sync selection state from Master grid into Detail grid
+     *
+     * @internal This is not a public method. There are no stability guarantees. Do not use.
+     */
+    syncDetailSelectionState(state: SelectionState, event?: RowSelectedEvent): void;
 }
 
 export interface _ExcelExportGridApi {

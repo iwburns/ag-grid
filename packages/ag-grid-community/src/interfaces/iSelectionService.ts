@@ -6,15 +6,19 @@ import type { RowCtrl, RowGui } from '../rendering/row/rowCtrl';
 import type { CheckboxSelectionComponent } from '../selection/checkboxSelectionComponent';
 import type { SelectAllFeature } from '../selection/selectAllFeature';
 import type { ChangedPath } from '../utils/changedPath';
+import type { IMasterDetailSelectionState } from './iMasterDetailSelectionState';
 import type { IRowNode } from './iRowNode';
 import type { ServerSideRowGroupSelectionState, ServerSideRowSelectionState } from './selectionState';
 
+export type SelectionState =
+    | string[]
+    | ServerSideRowSelectionState
+    | ServerSideRowGroupSelectionState
+    | IMasterDetailSelectionState;
+
 export interface ISelectionService {
-    getSelectionState(): string[] | ServerSideRowSelectionState | ServerSideRowGroupSelectionState | null;
-    setSelectionState(
-        state: string[] | ServerSideRowSelectionState | ServerSideRowGroupSelectionState,
-        source: SelectionEventSourceType
-    ): void;
+    getSelectionState(): SelectionState | null;
+    setSelectionState(state: SelectionState, source: SelectionEventSourceType): void;
     getSelectedNodes(): RowNode<any>[];
     getSelectedRows(): any[];
     getSelectionCount(): number;

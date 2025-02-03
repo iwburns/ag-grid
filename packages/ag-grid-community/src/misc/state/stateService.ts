@@ -713,13 +713,8 @@ export class StateService extends BeanStub implements NamedBean {
             return undefined;
         }
         const selectionState = selectionSvc.getSelectionState();
-        const noSelections =
-            !selectionState ||
-            (!Array.isArray(selectionState) &&
-                ((selectionState as ServerSideRowSelectionState).selectAll === false ||
-                    (selectionState as ServerSideRowGroupSelectionState).selectAllChildren === false) &&
-                !selectionState?.toggledNodes?.length);
-        return noSelections ? undefined : selectionState;
+
+        return selectionSvc.isEmpty() ? undefined : (selectionState as any);
     }
 
     private setRowSelectionState(

@@ -62,6 +62,7 @@ import type { IRowChildrenService } from '../interfaces/iRowChildrenService';
 import type { IRowModel } from '../interfaces/iRowModel';
 import type { IRowNodeStage } from '../interfaces/iRowNodeStage';
 import type { ISelectionService } from '../interfaces/iSelectionService';
+import type { ISelectionStrategy } from '../interfaces/iSelectionStrategy';
 import type { IServerSideTransactionManager } from '../interfaces/iServerSideRowModel';
 import type { IShowRowGroupColsService } from '../interfaces/iShowRowGroupColsService';
 import type { ISideBarService } from '../interfaces/iSideBar';
@@ -301,6 +302,10 @@ export interface CoreBeanCollection {
     rowChildrenSvc?: IRowChildrenService;
     footerSvc?: IFooterService;
     touchSvc?: TouchService;
+    flatSelectStrat?: ISelectionStrategy;
+    grpSelectStrat?: ISelectionStrategy;
+    flatMasterDetailSelectStrat?: ISelectionStrategy;
+    grpMasterDetailSelectStrat?: ISelectionStrategy;
 }
 
 export type BeanCollection = CoreBeanCollection & {
@@ -454,8 +459,11 @@ export type BeanName =
     | 'rowRenderer'
     | 'rowStyleSvc'
     | 'scrollVisibleSvc'
-    | 'selectionController'
     | 'selectionSvc'
+    | 'flatSelectStrat'
+    | 'grpSelectStrat'
+    | 'flatMasterDetailSelectStrat'
+    | 'grpMasterDetailSelectStrat'
     | 'showRowGroupCols'
     | 'sideBar'
     | 'sortSvc'

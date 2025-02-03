@@ -8,10 +8,12 @@ import {
     deselectAllOnCurrentPage,
     getSelectedNodes,
     getSelectedRows,
+    getSelectionState,
     selectAll,
     selectAllFiltered,
     selectAllOnCurrentPage,
     setNodesSelected,
+    setSelectionState,
 } from './rowSelectionApi';
 import { SelectionService } from './selectionService';
 
@@ -32,6 +34,8 @@ export const SharedRowSelectionModule: _ModuleWithApi<_RowSelectionGridApi> = {
         deselectAllOnCurrentPage,
         getSelectedNodes,
         getSelectedRows,
+        getSelectionState,
+        setSelectionState,
     },
 };
 

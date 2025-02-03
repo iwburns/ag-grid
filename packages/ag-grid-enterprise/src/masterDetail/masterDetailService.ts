@@ -107,13 +107,14 @@ export class MasterDetailService extends BeanStub implements NamedBean, IMasterD
                 setMaster(node, true, false);
             }
         } else {
-            const allLeafChildren = _getClientSideRowModel(this.beans)?.rootNode?.allLeafChildren;
-            if (allLeafChildren) {
-                for (let i = 0, len = allLeafChildren.length; i < len; ++i) {
-                    setMaster(allLeafChildren[i], true, false);
-                }
+            for (const child of _getClientSideRowModel(this.beans)?.rootNode?.allLeafChildren ?? []) {
+                setMaster(child, true, false);
             }
         }
+    }
+
+    public getDetailGridInfo(masterNode: RowNode): DetailGridInfo | undefined {
+        return this.store[masterNode.id!];
     }
 
     /** Used by flatten stage to get or create a detail node from a master node */

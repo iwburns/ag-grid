@@ -9,7 +9,14 @@ import {
 import { VERSION } from '../version';
 import { DetailCellRenderer } from './detailCellRenderer';
 import { DetailCellRendererCtrl } from './detailCellRendererCtrl';
-import { addDetailGridInfo, forEachDetailGridInfo, getDetailGridInfo, removeDetailGridInfo } from './masterDetailApi';
+import {
+    addDetailGridInfo,
+    forEachDetailGridInfo,
+    getDetailGridInfo,
+    removeDetailGridInfo,
+    storeDetailSelectionState,
+    syncDetailSelectionState,
+} from './masterDetailApi';
 import { masterDetailModuleCSS } from './masterDetailModule.css-GENERATED';
 import { MasterDetailSelectionService } from './masterDetailSelectionService';
 import { MasterDetailService } from './masterDetailService';
@@ -28,8 +35,10 @@ export const SharedMasterDetailModule: _ModuleWithApi<_MasterDetailGridApi> = {
         removeDetailGridInfo,
         getDetailGridInfo,
         forEachDetailGridInfo,
+        storeDetailSelectionState,
+        syncDetailSelectionState,
     },
-    dependsOn: [EnterpriseCoreModule, GroupCellRendererModule, StickyRowModule],
+    dependsOn: [GroupCellRendererModule, StickyRowModule, EnterpriseCoreModule],
     css: [masterDetailModuleCSS],
 };
 

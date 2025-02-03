@@ -1,4 +1,4 @@
-import type { BeanCollection, DetailGridInfo } from 'ag-grid-community';
+import type { BeanCollection, DetailGridInfo, RowSelectedEvent, SelectionState } from 'ag-grid-community';
 
 import type { MasterDetailService } from './masterDetailService';
 
@@ -29,7 +29,7 @@ export function getDetailGridInfo(beans: BeanCollection, id: string): DetailGrid
 export function forEachDetailGridInfo(
     beans: BeanCollection,
     callback: (gridInfo: DetailGridInfo, index: number) => void
-) {
+): void {
     operateOnStore(beans, (store) => {
         let index = 0;
         Object.values(store).forEach((gridInfo: DetailGridInfo) => {
@@ -39,4 +39,12 @@ export function forEachDetailGridInfo(
             }
         });
     });
+}
+
+export function storeDetailSelectionState(beans: BeanCollection, state: SelectionState, event: RowSelectedEvent): void {
+    beans.selectionSvc?.setSelectionState(state, 'detailGrid');
+}
+
+export function syncDetailSelectionState(beans: BeanCollection, state: SelectionState, event?: RowSelectedEvent): void {
+    beans.selectionSvc?.setSelectionState(state, 'detailGrid');
 }

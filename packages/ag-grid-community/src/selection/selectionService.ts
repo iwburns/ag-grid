@@ -13,10 +13,12 @@ import {
 } from '../gridOptionsUtils';
 import type { IClientSideRowModel } from '../interfaces/iClientSideRowModel';
 import type { ISelectionService, ISetNodesSelectedParams } from '../interfaces/iSelectionService';
+import type { ISelectionStrategy } from '../interfaces/iSelectionStrategy';
 import type { ServerSideRowGroupSelectionState, ServerSideRowSelectionState } from '../interfaces/selectionState';
 import { ChangedPath } from '../utils/changedPath';
 import { _error, _warn } from '../validation/logging';
 import { BaseSelectionService } from './baseSelectionService';
+import { _normaliseFooterRef } from './selectionUtils';
 
 export class SelectionService extends BaseSelectionService implements NamedBean, ISelectionService {
     beanName = 'selectionSvc' as const;
@@ -26,14 +28,19 @@ export class SelectionService extends BaseSelectionService implements NamedBean,
     private groupSelectsDescendants: boolean;
     private groupSelectsFiltered: boolean;
     private mode?: RowSelectionMode;
+    private strategy?: ISelectionStrategy;
 
     public override postConstruct(): void {
         super.postConstruct();
-        const { gos } = this;
+        const { gos, beans } = this;
 
         this.mode = _getRowSelectionMode(gos);
         this.groupSelectsDescendants = _getGroupSelectsDescendants(gos);
         this.groupSelectsFiltered = _getGroupSelection(gos) === 'filteredDescendants';
+
+        if (!this.groupSelectsDescendants) {
+            this.strategy = beans.flatSelectStrat;
+        }
 
         this.addManagedPropertyListeners(['groupSelectsChildren', 'groupSelectsFiltered', 'rowSelection'], () => {
             const groupSelectsDescendants = _getGroupSelectsDescendants(gos);
@@ -717,9 +724,4 @@ export class SelectionService extends BaseSelectionService implements NamedBean,
             }
         }
     }
-}
-
-/** Selection state of footer nodes is a clone of their siblings, so always act on sibling rather than footer */
-function _normaliseFooterRef(node: RowNode): RowNode {
-    return node.footer ? node.sibling : node;
 }

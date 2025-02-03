@@ -2,7 +2,9 @@ import type { BeanCollection } from '../context/context';
 import type { SelectAllMode } from '../entities/gridOptions';
 import type { RowNode } from '../entities/rowNode';
 import type { SelectionEventSourceType } from '../events';
+import type { IMasterDetailSelectionState } from '../interfaces/iMasterDetailSelectionState';
 import type { IRowNode } from '../interfaces/iRowNode';
+import type { IServerSideGroupSelectionState, IServerSideSelectionState } from '../interfaces/iServerSideSelection';
 import { _warn } from '../validation/logging';
 
 export function setNodesSelected(
@@ -79,4 +81,18 @@ export function getSelectedNodes<TData = any>(beans: BeanCollection): IRowNode<T
 
 export function getSelectedRows<TData = any>(beans: BeanCollection): TData[] {
     return beans.selectionSvc?.getSelectedRows() ?? [];
+}
+
+export function getSelectionState(
+    beans: BeanCollection
+): string[] | IServerSideSelectionState | IServerSideGroupSelectionState | IMasterDetailSelectionState {
+    return beans.selectionSvc?.getSelectionState() ?? [];
+}
+
+export function setSelectionState(
+    beans: BeanCollection,
+    state: string[] | IServerSideSelectionState | IServerSideGroupSelectionState | IMasterDetailSelectionState,
+    source: SelectionEventSourceType = 'api'
+): void {
+    beans.selectionSvc?.setSelectionState(state, source);
 }

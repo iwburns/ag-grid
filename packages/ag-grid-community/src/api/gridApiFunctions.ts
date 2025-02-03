@@ -83,6 +83,8 @@ export const gridApiFunctionsMap: Record<keyof GridApi, ValidationModuleName> = 
         deselectAllOnCurrentPage: 0,
         getSelectedNodes: 0,
         getSelectedRows: 0,
+        getSelectionState: 0,
+        setSelectionState: 0,
     }),
     ...mod<_RowGridApi<any>>('RowApi', {
         redrawRows: 0,
@@ -331,6 +333,8 @@ export const gridApiFunctionsMap: Record<keyof GridApi, ValidationModuleName> = 
         removeDetailGridInfo: 0,
         getDetailGridInfo: 0,
         forEachDetailGridInfo: 0,
+        storeDetailSelectionState: 0,
+        syncDetailSelectionState: 0,
     }),
 
     ...mod<_ContextMenuGridApi>('ContextMenu', {
