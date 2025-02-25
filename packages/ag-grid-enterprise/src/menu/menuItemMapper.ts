@@ -7,6 +7,7 @@ import type {
     LocaleTextFunc,
     MenuItemDef,
     NamedBean,
+    RowNode,
 } from 'ag-grid-community';
 import {
     BeanStub,
@@ -74,6 +75,7 @@ export class MenuItemMapper extends BeanStub implements NamedBean {
             sortSvc,
             chartMenuItemMapper,
             valueColsSvc,
+            pinnedRowModel,
         } = beans;
 
         const getStockMenuItem = (
@@ -81,42 +83,67 @@ export class MenuItemMapper extends BeanStub implements NamedBean {
             column: AgColumn | null,
             sourceElement: () => HTMLElement,
             source: ColumnEventType
-        ): MenuItemDef | 'separator' | null => {
+        ): MenuItemDef | 'separator' | false | null | undefined => {
             validation?.validateMenuItem(key);
 
             switch (key) {
                 case 'pinSubMenu':
-                    return pinnedCols && column
-                        ? {
-                              name: localeTextFunc('pinColumn', 'Pin Column'),
-                              icon: _createIconNoSpan('menuPin', beans, null),
-                              subMenu: ['clearPinned', 'pinLeft', 'pinRight'],
-                          }
-                        : null;
+                    return (
+                        pinnedCols &&
+                        column && {
+                            name: localeTextFunc('pinColumn', 'Pin Column'),
+                            icon: _createIconNoSpan('menuPin', beans, null),
+                            subMenu: ['clearPinned', 'pinLeft', 'pinRight'],
+                        }
+                    );
                 case 'pinLeft':
-                    return pinnedCols && column
-                        ? {
-                              name: localeTextFunc('pinLeft', 'Pin Left'),
-                              action: () => pinnedCols.setColsPinned([column], 'left', source),
-                              checked: !!column && column.isPinnedLeft(),
-                          }
-                        : null;
+                    return (
+                        pinnedCols &&
+                        column && {
+                            name: localeTextFunc('pinLeft', 'Pin Left'),
+                            action: () => pinnedCols.setColsPinned([column], 'left', source),
+                            checked: !!column && column.isPinnedLeft(),
+                        }
+                    );
                 case 'pinRight':
-                    return pinnedCols && column
-                        ? {
-                              name: localeTextFunc('pinRight', 'Pin Right'),
-                              action: () => pinnedCols.setColsPinned([column], 'right', source),
-                              checked: !!column && column.isPinnedRight(),
-                          }
-                        : null;
+                    return (
+                        pinnedCols &&
+                        column && {
+                            name: localeTextFunc('pinRight', 'Pin Right'),
+                            action: () => pinnedCols.setColsPinned([column], 'right', source),
+                            checked: !!column && column.isPinnedRight(),
+                        }
+                    );
                 case 'clearPinned':
-                    return pinnedCols && column
-                        ? {
-                              name: localeTextFunc('noPin', 'No Pin'),
-                              action: () => pinnedCols.setColsPinned([column], null, source),
-                              checked: !!column && !column.isPinned(),
-                          }
-                        : null;
+                    return (
+                        pinnedCols &&
+                        column && {
+                            name: localeTextFunc('noPin', 'No Pin'),
+                            action: () => pinnedCols.setColsPinned([column], null, source),
+                            checked: !!column && !column.isPinned(),
+                        }
+                    );
+                case 'pinRowSubMenu':
+                    return (
+                        pinnedRowModel && {
+                            name: localeTextFunc('pinRow', 'Pin Row'),
+                            subMenu: ['pinTop', 'pinBottom'],
+                        }
+                    );
+                case 'pinTop':
+                    return (
+                        pinnedRowModel && {
+                            name: localeTextFunc('pinTop', 'Pin to Top'),
+                            action: ({ node }) => node && pinnedRowModel.pinRow(node as RowNode, 'top'),
+                        }
+                    );
+                case 'pinBottom':
+                    return (
+                        pinnedRowModel && {
+                            name: localeTextFunc('pinBottom', 'Pin to Bottom'),
+                            action: ({ node }) => node && pinnedRowModel.pinRow(node as RowNode, 'bottom'),
+                        }
+                    );
                 case 'valueAggSubMenu':
                     if (aggFuncSvc && valueColsSvc && (column?.isPrimary() || column?.getColDef().pivotValueColumn)) {
                         return {
@@ -314,7 +341,7 @@ export class MenuItemMapper extends BeanStub implements NamedBean {
                           }
                         : null;
                 case 'separator':
-                    return 'separator';
+                    return key;
                 case 'pivotChart':
                 case 'chartRange':
                     return (chartMenuItemMapper as ChartMenuItemMapper).getChartItems(key);
@@ -379,7 +406,7 @@ export class MenuItemMapper extends BeanStub implements NamedBean {
         };
 
         originalList.forEach((menuItemOrString) => {
-            let result: MenuItemDef | 'separator' | null;
+            let result: MenuItemDef | 'separator' | false | null | undefined;
 
             if (typeof menuItemOrString === 'string') {
                 result = getStockMenuItem(menuItemOrString as DefaultMenuItem, column, sourceElement, source);
