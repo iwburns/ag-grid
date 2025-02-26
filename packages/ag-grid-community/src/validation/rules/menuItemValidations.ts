@@ -9,6 +9,7 @@ export const MENU_ITEM_MODULES: Record<DefaultMenuItem, ValidationModuleName | V
     pinRowSubMenu: 'PinnedRow',
     pinBottom: 'PinnedRow',
     pinTop: 'PinnedRow',
+    unpinRow: 'PinnedRow',
     valueAggSubMenu: 'SharedAggregation',
     autoSizeThis: 'ColumnAutoSize',
     autoSizeAll: 'ColumnAutoSize',

@@ -144,6 +144,13 @@ export class MenuItemMapper extends BeanStub implements NamedBean {
                             action: ({ node }) => node && pinnedRowModel.pinRow(node as RowNode, 'bottom'),
                         }
                     );
+                case 'unpinRow':
+                    return (
+                        pinnedRowModel && {
+                            name: localeTextFunc('unpinRow', 'Unpin Row'),
+                            action: ({ node }) => node && pinnedRowModel.unpinRow(node as RowNode),
+                        }
+                    );
                 case 'valueAggSubMenu':
                     if (aggFuncSvc && valueColsSvc && (column?.isPrimary() || column?.getColDef().pivotValueColumn)) {
                         return {

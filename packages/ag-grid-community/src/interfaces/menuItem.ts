@@ -156,6 +156,7 @@ export type DefaultMenuItem =
     | 'pinRowSubMenu'
     | 'pinTop'
     | 'pinBottom'
+    | 'unpinRow'
     | 'clearPinned'
     | 'valueAggSubMenu'
     | 'autoSizeThis'
