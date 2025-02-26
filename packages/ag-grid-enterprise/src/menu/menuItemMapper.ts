@@ -127,7 +127,7 @@ export class MenuItemMapper extends BeanStub implements NamedBean {
                     return (
                         pinnedRowModel && {
                             name: localeTextFunc('pinRow', 'Pin Row'),
-                            subMenu: ['pinTop', 'pinBottom'],
+                            subMenu: ['pinTop', 'pinBottom', 'unpinRow'],
                         }
                     );
                 case 'pinTop':

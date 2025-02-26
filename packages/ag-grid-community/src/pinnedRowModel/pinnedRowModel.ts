@@ -11,15 +11,15 @@ import { _removeFromArray } from '../utils/array';
 import { _warn } from '../validation/logging';
 
 interface IPinnedRowModel {
-    isEmpty(floating: RowPinnedType): boolean;
+    isEmpty(floating: NonNullable<RowPinnedType>): boolean;
     ensureRowHeightsValid(): boolean;
-    getTotalHeight(floating: RowPinnedType): number;
-    getRowCount(floating: RowPinnedType): number;
-    getRowByIndex(index: number, floating: RowPinnedType): RowNode | undefined;
-    getRowById(id: string, floating: RowPinnedType): RowNode | undefined;
-    forEachRow(floating: RowPinnedType, callback: (node: RowNode, index: number) => void): void;
-    pinRow(node: RowNode, floating: RowPinnedType): void;
-    unpinRow(node: RowNode, floating: RowPinnedType): void;
+    getTotalHeight(floating: NonNullable<RowPinnedType>): number;
+    getRowCount(floating: NonNullable<RowPinnedType>): number;
+    getRowByIndex(index: number, floating: NonNullable<RowPinnedType>): RowNode | undefined;
+    getRowById(id: string, floating: NonNullable<RowPinnedType>): RowNode | undefined;
+    forEachRow(floating: NonNullable<RowPinnedType>, callback: (node: RowNode, index: number) => void): void;
+    pinRow(node: RowNode, floating: NonNullable<RowPinnedType>): void;
+    unpinRow(node: RowNode, floating: NonNullable<RowPinnedType>): void;
 }
 class StaticPinnedRowModel implements IPinnedRowModel {
     constructor(
@@ -174,6 +174,10 @@ class StaticPinnedRowModel implements IPinnedRowModel {
     }
 }
 
+function getOtherContainer(floating: NonNullable<RowPinnedType>): NonNullable<RowPinnedType> {
+    return floating === 'bottom' ? 'top' : 'bottom';
+}
+
 class DynamicPinnedRowModel implements IPinnedRowModel {
     private top = createCache<RowNode>();
     private bottom = createCache<RowNode>();
@@ -181,11 +185,11 @@ class DynamicPinnedRowModel implements IPinnedRowModel {
 
     constructor(private beans: BeanCollection) {}
 
-    private getCache(floating: RowPinnedType): OrderedCache<RowNode> {
+    private getCache(floating: NonNullable<RowPinnedType>): OrderedCache<RowNode> {
         return floating === 'top' ? this.top : this.bottom;
     }
 
-    isEmpty(floating: RowPinnedType): boolean {
+    isEmpty(floating: NonNullable<RowPinnedType>): boolean {
         return this.getCache(floating).order.length === 0;
     }
 
@@ -209,27 +213,29 @@ class DynamicPinnedRowModel implements IPinnedRowModel {
         return anyChange;
     }
 
-    getTotalHeight(floating: RowPinnedType): number {
+    getTotalHeight(floating: NonNullable<RowPinnedType>): number {
         return getTotalHeight(this.getCache(floating));
     }
 
-    getRowCount(floating: RowPinnedType): number {
+    getRowCount(floating: NonNullable<RowPinnedType>): number {
         return getSize(this.getCache(floating));
     }
 
-    getRowById(id: string, floating: RowPinnedType): RowNode<any> | undefined {
+    getRowById(id: string, floating: NonNullable<RowPinnedType>): RowNode<any> | undefined {
         return getById(this.getCache(floating), id);
     }
 
-    getRowByIndex(index: number, floating: RowPinnedType): RowNode<any> | undefined {
+    getRowByIndex(index: number, floating: NonNullable<RowPinnedType>): RowNode<any> | undefined {
         return getByIndex(this.getCache(floating), index);
     }
 
-    forEachRow(floating: RowPinnedType, callback: (node: RowNode<any>, index: number) => void): void {
+    forEachRow(floating: NonNullable<RowPinnedType>, callback: (node: RowNode<any>, index: number) => void): void {
         forEach(this.getCache(floating), callback);
     }
 
-    pinRow(node: RowNode<any>, floating: RowPinnedType): void {
+    pinRow(node: RowNode<any>, floating: NonNullable<RowPinnedType>): void {
+        if (this.getRowById(node.id!, floating)) return;
+
         const cache = this.getCache(floating);
         const size = this.getRowCount(floating);
         let rowTop = 0;
@@ -237,8 +243,12 @@ class DynamicPinnedRowModel implements IPinnedRowModel {
             rowTop += rowNode.rowTop ?? 0;
         });
 
-        this.indexMap.set(node.id!, node.rowIndex);
-        _getClientSideRowModel(this.beans)?.updateRowData({ remove: [node.data] });
+        if (this.getRowById(node.id!, getOtherContainer(floating))) {
+            clearValue(this.getCache(getOtherContainer(floating)), node.id!);
+        } else {
+            this.indexMap.set(node.id!, node.rowIndex);
+            _getClientSideRowModel(this.beans)?.updateRowData({ remove: [node.data] });
+        }
 
         setRowTopAndRowIndex(this.beans, node, rowTop, size);
 
@@ -250,7 +260,9 @@ class DynamicPinnedRowModel implements IPinnedRowModel {
         });
     }
 
-    unpinRow(node: RowNode<any>, floating: RowPinnedType): void {
+    unpinRow(node: RowNode<any>, floating: NonNullable<RowPinnedType>): void {
+        if (!this.getRowById(node.id!, floating)) return;
+
         const idx = this.indexMap.get(node.id!);
         _getClientSideRowModel(this.beans)?.updateRowData({ add: [node.data], addIndex: idx });
 
@@ -289,7 +301,7 @@ export class PinnedRowModel extends BeanStub implements NamedBean {
     }
 
     public isEmpty(floating: RowPinnedType): boolean {
-        return this.innerRowModel.isEmpty(floating);
+        return !!floating && this.innerRowModel.isEmpty(floating);
     }
 
     public isRowsToRender(floating: RowPinnedType): boolean {
@@ -360,7 +372,9 @@ export class PinnedRowModel extends BeanStub implements NamedBean {
             floating ??= 'bottom';
         }
 
-        return this.innerRowModel.unpinRow(node, floating);
+        if (floating) {
+            this.innerRowModel.unpinRow(node, floating);
+        }
     }
 }
 
